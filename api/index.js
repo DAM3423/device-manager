@@ -12,6 +12,4 @@ app.use(express.json());
 
 app.use("/devices", deviceRoutes);
 
-app.listen(8080, () => {
-  console.log("Server listening on port 8080");
-});
+module.exports = app;
