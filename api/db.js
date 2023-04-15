@@ -8,10 +8,14 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const getAllDevices = async () => {
+const getDevices = async (page, perPage) => {
   const client = await pool.connect();
+  const offset = (page - 1) * perPage;
+
   try {
-    const result = await client.query("SELECT * FROM devices");
+    const result = await client.query(
+      `SELECT * FROM devices LIMIT ${perPage} OFFSET ${offset}`
+    );
     return result.rows;
   } finally {
     client.release();
@@ -79,7 +83,7 @@ const deleteDevice = async (id) => {
 };
 
 module.exports = {
-  getAllDevices,
+  getDevices,
   getDeviceById,
   createDevice,
   updateDevice,

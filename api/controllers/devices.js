@@ -1,7 +1,10 @@
 const db = require("../db");
 
-const getAllDevices = async (req, res) => {
-  const devices = await db.getAllDevices();
+const getDevices = async (req, res) => {
+  const page = parseInt(req.query.page);
+  const perPage = parseInt(req.query.perPage);
+
+  const devices = await db.getDevices(page, perPage);
   res.json(devices);
 };
 
@@ -17,7 +20,7 @@ const getDeviceById = async (req, res) => {
 const createDevice = async (req, res) => {
   const { model, brand, release_date, os, is_new, received_datetime } =
     req.body;
-  
+
   const device = await db.createDevice({
     model,
     brand,
@@ -57,7 +60,7 @@ const deleteDevice = async (req, res) => {
 };
 
 module.exports = {
-  getAllDevices,
+  getDevices,
   getDeviceById,
   createDevice,
   updateDevice,

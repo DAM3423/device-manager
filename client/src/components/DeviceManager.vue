@@ -36,7 +36,6 @@ export default {
             perPage: this.perPage,
           },
         })
-        console.log(response.data);
         this.items = response.data.items
         this.totalItems = response.data.totalItems
       } catch (error) {

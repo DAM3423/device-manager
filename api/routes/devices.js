@@ -6,7 +6,7 @@ const {
   validateUUID,
 } = require("../middleware/validation/devices");
 
-router.get("/", deviceController.getAllDevices);
+router.get("/", deviceController.getDevices);
 router.get("/:id", validateUUID, deviceController.getDeviceById);
 router.post("/", validateDevice, deviceController.createDevice);
 router.put("/:id", validateUUID, validateDevice, deviceController.updateDevice);
