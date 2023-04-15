@@ -1,8 +1,8 @@
 <template>
   <v-container class="d-flex justify-center align-center fill-height">
-    <!-- <v-data-table :headers="headers" :items="items" :page.sync="page" :items-per-page.sync="perPage"
-      :total-items="totalItems" :loading="loading" :server-items-length="true" @pagination="fetchItems">
-    </v-data-table> -->
+    <v-data-table :headers="headers" :items="items" :page.sync="page" :items-per-page.sync="perPage" :loading="loading"
+      :server-items-length="totalItems" @pagination="fetchItems">
+    </v-data-table>
   </v-container>
 </template>
 
@@ -37,7 +37,7 @@ export default {
           },
         })
         this.items = response.data.items
-        this.totalItems = response.data.totalItems
+        this.totalItems = parseInt(response.data.total_items)
       } catch (error) {
         console.error(error)
       } finally {

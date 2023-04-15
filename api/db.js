@@ -22,6 +22,16 @@ const getDevices = async (page, perPage) => {
   }
 };
 
+const getDeviceCount = async (page, perPage) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query("SELECT COUNT(*) FROM devices;");
+    return result.rows[0].count;
+  } finally {
+    client.release();
+  }
+};
+
 const getDeviceById = async (id) => {
   const client = await pool.connect();
   try {
@@ -84,6 +94,7 @@ const deleteDevice = async (id) => {
 
 module.exports = {
   getDevices,
+  getDeviceCount,
   getDeviceById,
   createDevice,
   updateDevice,

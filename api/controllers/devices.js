@@ -4,8 +4,13 @@ const getDevices = async (req, res) => {
   const page = parseInt(req.query.page);
   const perPage = parseInt(req.query.perPage);
 
+  const total = await db.getDeviceCount();
   const devices = await db.getDevices(page, perPage);
-  res.json(devices);
+
+  res.json({
+    items: devices,
+    total_items: total
+  });
 };
 
 const getDeviceById = async (req, res) => {

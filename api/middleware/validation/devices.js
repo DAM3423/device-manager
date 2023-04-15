@@ -40,7 +40,7 @@ const validateUUID = (req, res, next) => {
 const validatePagination = (req, res, next) => {
   const { error, value } = pagination.validate(req.query);
   if (error) {
-    return res.status(400).send(error);
+    return res.status(400).send({ error: error.details[0].message });
   }
   req.pagination = {
     page: value.page,
