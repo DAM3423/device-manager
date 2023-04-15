@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:latest
     env_file:
-      - ./env.dev
+      - ./.env.prod
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -19,6 +19,8 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.prod
+    env_file:
+      - ./.env.prod
     ports:
       - "8080:8080"
     volumes:
