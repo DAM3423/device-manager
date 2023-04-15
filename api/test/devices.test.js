@@ -111,6 +111,44 @@ describe("Devices API", () => {
 
       testDevice.brand = brandForAfter;
     });
+    it("returns release_date required when release_date key missing from device object", async () => {
+      // Moving the release_date name to a local var so we can reset it after the test
+      const releaseDateForAfter = testDevice.release_date;
+      delete testDevice.release_date;
+
+      const res = await request(app)
+        .post("/devices")
+        .send(testDevice)
+        .set("Accept", "application/json");
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body).toHaveProperty("model", testDevice.model);
+      expect(res.body).toHaveProperty("brand", testDevice.brand);
+      expect(res.body).toHaveProperty("release_date", null);
+      expect(res.body).toHaveProperty("os", testDevice.os);
+      expect(res.body).toHaveProperty("is_new", testDevice.is_new);
+      expect(res.body).toHaveProperty(
+        "received_datetime",
+        testDevice.received_datetime
+      );
+
+      testDevice.release_date = releaseDateForAfter;
+    });
+    it("returns release_date should be string when release_date field is int", async () => {
+      // Moving the release_date name to a local var so we can reset it after the test
+      const releaseDateForAfter = testDevice.release_date;
+      testDevice.release_date = 1;
+
+      const res = await request(app)
+        .post("/devices")
+        .send(testDevice)
+        .set("Accept", "application/json");
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toEqual({ error: '"release_date" must be a string' });
+
+      testDevice.release_date = releaseDateForAfter;
+    });
   });
   describe("GET /devices/:id", () => {
     beforeEach(async () => {
