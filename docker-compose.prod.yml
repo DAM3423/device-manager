@@ -2,6 +2,8 @@ version: "3.9"
 services:
   db:
     image: postgres:latest
+    env_file:
+      - ./env.dev
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
