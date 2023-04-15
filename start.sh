@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# VDocker container for back end and DB
+
 if [ "$1" == "dev" ]; then
     COMPOSE_FILE=docker-compose.dev.yml
 elif [ "$1" == "prod" ]; then

@@ -32,18 +32,6 @@ services:
       - db
     networks:
       - backend
-  
-  client:
-    build:
-      context: ./client
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./client:/usr/src/client
-      - /usr/src/client/node_modules/
-    networks:
-      - backend
 
 networks:
   backend:
