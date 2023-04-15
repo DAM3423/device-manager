@@ -15,25 +15,30 @@ const getDeviceById = async (req, res) => {
 };
 
 const createDevice = async (req, res) => {
-  const { model, brand, release_date, os, is_new } = req.body;
+  const { model, brand, release_date, os, is_new, received_datetime } =
+    req.body;
+  
   const device = await db.createDevice({
     model,
     brand,
     release_date,
     os,
     is_new,
+    received_datetime,
   });
   res.status(201).json(device);
 };
 
 const updateDevice = async (req, res) => {
-  const { model, brand, release_date, os, is_new } = req.body;
+  const { model, brand, release_date, os, is_new, received_datetime } =
+    req.body;
   const device = await db.updateDevice(req.params.id, {
     model,
     brand,
     release_date,
     os,
     is_new,
+    received_datetime,
   });
   if (device) {
     res.json(device);

@@ -30,12 +30,19 @@ const getDeviceById = async (id) => {
   }
 };
 
-const createDevice = async ({ id, model, brand, release_date, os, is_new }) => {
+const createDevice = async ({
+  model,
+  brand,
+  release_date,
+  os,
+  is_new,
+  received_datetime,
+}) => {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      "INSERT INTO devices (model, brand, release_date, os, is_new) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [model, brand, release_date, os, is_new]
+      "INSERT INTO devices (model, brand, release_date, os, is_new, received_datetime) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [model, brand, release_date, os, is_new, received_datetime]
     );
     return result.rows[0];
   } finally {
@@ -43,12 +50,15 @@ const createDevice = async ({ id, model, brand, release_date, os, is_new }) => {
   }
 };
 
-const updateDevice = async (id, { model, brand, release_date, os, is_new }) => {
+const updateDevice = async (
+  id,
+  { model, brand, release_date, os, is_new, received_datetime }
+) => {
   const client = await pool.connect();
   try {
     const result = await client.query(
-      "UPDATE devices SET model = $1, brand = $2, release_date = $3, os = $4, is_new = $5 WHERE id = $6 RETURNING *",
-      [model, brand, release_date, os, is_new, id]
+      "UPDATE devices SET model = $1, brand = $2, release_date = $3, os = $4, is_new = $5, received_datetime = $6 WHERE id = $7 RETURNING *",
+      [model, brand, release_date, os, is_new, received_datetime, id]
     );
     return result.rows[0];
   } finally {

@@ -4,13 +4,15 @@ const db = require("../db");
 
 // Mock device data for testing
 const testDevice = {
-  model: "Test Model",
-  brand: "Test Brand",
-  release_date: "2022-01-01",
-  os: "Test OS",
-  is_new: true,
-  received_datetime: "2022-01-01T00:00:00.000Z",
+  model: "Teszt",
+  brand: "Aefewfewn",
+  release_date: "2014/07",
+  os: "Android 4.2.2 Jelly Beasdfsdsdn",
+  is_new: false,
+  received_datetime: "2023-04-14T00:00:00.000Z",
 };
+
+let testId = "";
 
 describe("Devices API", () => {
   describe("GET /devices", () => {
@@ -90,6 +92,39 @@ describe("Devices API", () => {
 
       expect(res.statusCode).toEqual(400);
       expect(res.body).toEqual({ error: '"model" is required' });
+    });
+  });
+  describe("GET /devices/:id", () => {
+    beforeEach(async () => {
+      const res = await request(app)
+        .post("/devices")
+        .send(testDevice)
+        .set("Accept", "application/json");
+
+      testId = res.body.id;
+      console.log(testId);
+    });
+
+    it("should return a device by ID", async () => {
+      const res = await request(app).get(`/devices/${testId}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty("model", testDevice.model);
+      expect(res.body).toHaveProperty("brand", testDevice.brand);
+      expect(res.body).toHaveProperty("release_date", testDevice.release_date);
+      expect(res.body).toHaveProperty("os", testDevice.os);
+      expect(res.body).toHaveProperty("is_new", testDevice.is_new);
+      expect(res.body).toHaveProperty(
+        "received_datetime",
+        testDevice.received_datetime
+      );
+    });
+
+    it("should return 404 if device is not found", async () => {
+      const res = await request(app).get("/devices/unknown-id");
+
+      expect(res.statusCode).toEqual(404);
+      expect(res.body).toHaveProperty("error", "Device not found");
     });
   });
 });
