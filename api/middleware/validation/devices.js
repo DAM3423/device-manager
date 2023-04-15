@@ -12,8 +12,10 @@ const device = Joi.object({
 const uuid = Joi.string().uuid();
 
 const pagination = Joi.object({
-  page: Joi.number().integer().min(1).required(),
-  perPage: Joi.number().integer().min(1).required(),
+  page: Joi.number().integer().min(1).allow(null),
+  itemsPerPage: Joi.number().integer().min(1).allow(null),
+  sortBy: Joi.array().allow(null),
+  sortDesc: Joi.array().allow(null),
 });
 
 const validateDevice = (req, res, next) => {
@@ -44,7 +46,7 @@ const validatePagination = (req, res, next) => {
   }
   req.pagination = {
     page: value.page,
-    perPage: value.perPage,
+    itemsPerPage: value.itemsPerPage,
   };
   next();
 };

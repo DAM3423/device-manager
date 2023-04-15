@@ -2,14 +2,16 @@ const db = require("../db");
 
 const getDevices = async (req, res) => {
   const page = parseInt(req.query.page);
-  const perPage = parseInt(req.query.perPage);
+  const itemsPerPage = parseInt(req.query.itemsPerPage);
+  const sortBy = req.query.sortBy;
+  const sortDesc = req.query.sortDesc;
 
   const total = await db.getDeviceCount();
-  const devices = await db.getDevices(page, perPage);
+  const devices = await db.getDevices(page, itemsPerPage, sortBy, sortDesc);
 
   res.json({
     items: devices,
-    total_items: total
+    total_items: total,
   });
 };
 

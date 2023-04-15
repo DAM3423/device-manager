@@ -8,21 +8,46 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const getDevices = async (page, perPage) => {
+const getDevices = async (page, itemsPerPage, sortBy, sortDesc) => {
   const client = await pool.connect();
-  const offset = (page - 1) * perPage;
 
   try {
-    const result = await client.query(
-      `SELECT * FROM devices LIMIT ${perPage} OFFSET ${offset}`
-    );
+    let queryString = `SELECT * FROM devices`;
+
+    if (
+      sortBy &&
+      sortDesc &&
+      sortBy.length &&
+      sortDesc.length &&
+      sortBy.length === sortDesc.length
+    ) {
+      queryString += " ORDER BY";
+      for (let i = 0; i < sortBy.length; i++) {
+        if (sortBy[i] && sortDesc[i] === "true") {
+          queryString += ` ${sortBy} DESC`;
+        } else if (sortBy[i]) {
+          queryString += ` ${sortBy}`;
+        }
+
+        if (i !== sortBy.length - 1) {
+          queryString += ",";
+        }
+      }
+    }
+
+    if (page && itemsPerPage) {
+      const offset = (page - 1) * itemsPerPage;
+      queryString += ` LIMIT ${itemsPerPage} OFFSET ${offset}`;
+    }
+
+    const result = await client.query(queryString);
     return result.rows;
   } finally {
     client.release();
   }
 };
 
-const getDeviceCount = async (page, perPage) => {
+const getDeviceCount = async () => {
   const client = await pool.connect();
   try {
     const result = await client.query("SELECT COUNT(*) FROM devices;");
