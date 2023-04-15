@@ -4,9 +4,10 @@ const deviceController = require("../controllers/devices");
 const {
   validateDevice,
   validateUUID,
+  validatePagination,
 } = require("../middleware/validation/devices");
 
-router.get("/", deviceController.getDevices);
+router.get("/", validatePagination, deviceController.getDevices);
 router.get("/:id", validateUUID, deviceController.getDeviceById);
 router.post("/", validateDevice, deviceController.createDevice);
 router.put("/:id", validateUUID, validateDevice, deviceController.updateDevice);

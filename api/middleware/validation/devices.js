@@ -11,6 +11,11 @@ const device = Joi.object({
 
 const uuid = Joi.string().uuid();
 
+const pagination = Joi.object({
+  page: Joi.number().integer().min(1).required(),
+  perPage: Joi.number().integer().min(1).required(),
+});
+
 const validateDevice = (req, res, next) => {
   const { error } = device.validate(req.body);
 
@@ -32,7 +37,20 @@ const validateUUID = (req, res, next) => {
   next();
 };
 
+const validatePagination = (req, res, next) => {
+  const { error, value } = pagination.validate(req.query);
+  if (error) {
+    return res.status(400).send(error);
+  }
+  req.pagination = {
+    page: value.page,
+    perPage: value.perPage,
+  };
+  next();
+};
+
 module.exports = {
   validateDevice,
   validateUUID,
+  validatePagination,
 };
