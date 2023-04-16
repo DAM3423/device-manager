@@ -7,10 +7,10 @@ const {
   validatePagination,
 } = require("../middleware/validation/devices");
 
-router.post("/", validatePagination, deviceController.getDevices);
-router.get("/:id", validateUUID, deviceController.getDeviceById);
-router.post("/", validateDevice, deviceController.createDevice);
-router.put("/:id", validateUUID, validateDevice, deviceController.updateDevice);
-router.delete("/:id", validateUUID, deviceController.deleteDevice);
+router.post("/index", validatePagination, deviceController.getDevices);
+router.get("/show/:id", validateUUID, deviceController.getDeviceById);
+router.post("/create", validateDevice, deviceController.createDevice);
+router.put("/update/:id", validateUUID, validateDevice, deviceController.updateDevice);
+router.delete("/delete/:id", validateUUID, deviceController.deleteDevice);
 
 module.exports = router;

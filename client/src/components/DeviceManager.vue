@@ -56,20 +56,8 @@
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" md="6">
-                            <v-text-field
-                              v-model="editedItem.release_date"
-                              label="Release Date"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" md="6">
-                            <v-text-field
-                              v-model="editedItem.release_date"
-                              label="Release Date"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" md="6">
                             <v-menu
-                              v-model="menu"
+                              v-model="releaseDateMenu"
                               :close-on-content-click="false"
                               :nudge-right="40"
                               transition="scale-transition"
@@ -77,17 +65,42 @@
                             >
                               <template v-slot:activator="{ on }">
                                 <v-text-field
-                                  v-model="editItem.date_received"
-                                  label="Date"
+                                  v-model="editItem.release_date"
+                                  label="Release date"
                                   prepend-icon="mdi-calendar"
                                   readonly
                                   v-on="on"
                                 ></v-text-field>
                               </template>
                               <v-date-picker
-                                format="YYYY/MM/DD"
-                                v-model="editItem.date_received"
-                                @input="menu = false"
+                                format="YYYY-MM"
+                                v-model="editItem.release_date"
+                                type="month"
+                                @input="releaseDateMenu = false"
+                              ></v-date-picker>
+                            </v-menu>
+                          </v-col>
+                          <v-col cols="12" md="6">
+                            <v-menu
+                              v-model="receivedDatetimeMenu"
+                              :close-on-content-click="false"
+                              :nudge-right="40"
+                              transition="scale-transition"
+                              offset-y
+                            >
+                              <template v-slot:activator="{ on }">
+                                <v-text-field
+                                  v-model="editItem.received_datetime"
+                                  label="Received date"
+                                  prepend-icon="mdi-calendar"
+                                  readonly
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                format="YYYY-MM-DD"
+                                v-model="editItem.received_datetime"
+                                @input="receivedDatetimeMenu = false"
                               ></v-date-picker>
                             </v-menu>
                           </v-col>
@@ -208,7 +221,7 @@ export default {
       os: "",
       release_date: "",
       is_new: null,
-      date_received: "",
+      received_datetime: "",
     },
     defaultItem: {
       brand: "",
@@ -216,12 +229,13 @@ export default {
       os: "",
       release_date: "",
       is_new: null,
-      date_received: "",
+      received_datetime: "",
     },
     successAlert: false,
     deleteAlert: false,
     search: "",
-    menu: false,
+    releaseDateMenu: false,
+    receivedDatetimeMenu: false,
   }),
   computed: {
     formTitle() {
@@ -244,7 +258,7 @@ export default {
     search(val) {
       this.string = val;
       this.fetchItems();
-    },
+    }
   },
   methods: {
     async fetchItems() {
@@ -254,7 +268,7 @@ export default {
 
       try {
         const response = await axios.post(
-          this.apiEndpoint,
+          `${this.apiEndpoint}/index`,
           {
             page: page,
             itemsPerPage: itemsPerPage,
@@ -264,13 +278,43 @@ export default {
           },
           this.httpOptions
         );
-        this.items = response.data.items;
+        this.items = this.formatDates(response.data.items, "in");
         this.totalItems = parseInt(response.data.total_items);
       } catch (error) {
         console.error(error);
       } finally {
         this.loading = false;
       }
+    },
+    formatDates(items, direction) {
+      if (direction === "in") {
+        for (let i = 0; i < items.length; i++) {
+          // Change release_date format from YYYY/MM to YYYY-MM
+          items[i].release_date = items[i].release_date.replace("/", "-");
+
+          // Change received_datetime format from ISO string to YYYY/MM/DD
+          const dateObj = new Date(items[i].received_datetime);
+          const year = dateObj.getUTCFullYear();
+          const month = ("0" + (dateObj.getUTCMonth() + 1)).slice(-2);
+          const day = ("0" + dateObj.getUTCDate()).slice(-2);
+          items[i].received_datetime = `${year}-${month}-${day}`;
+        }
+      } else {
+        for (let i = 0; i < items.length; i++) {
+          // Change release_date format from YYYY/MM to YYYY-MM
+          items[i].release_date = items[i].release_date.replace("-", "/");
+
+          // Change received_datetime format from YYYY/MM/DD to ISO string
+          const dateArr = items[i].received_datetime.split("/");
+          const year = dateArr[0];
+          const month = ("0" + dateArr[1]).slice(-2);
+          const day = ("0" + dateArr[2]).slice(-2);
+          items[i].received_datetime = `${year}-${month}-${day}T00:00:00.000Z`;
+        }
+      }
+
+      console.log(items);
+      return items;
     },
     editItem(item) {
       this.editedIndex = this.items.indexOf(item);
@@ -284,7 +328,7 @@ export default {
     },
     async deleteItemConfirm() {
       await axios.delete(
-        `${this.apiEndpoint}/${this.editedItem.id}`,
+        `${this.apiEndpoint}/delete/${this.editedItem.id}`,
         this.httpOptions
       );
 
@@ -307,6 +351,7 @@ export default {
       });
     },
     save() {
+      console.log(this.editedItem);
       if (this.editedIndex > -1) {
         const selectedKeys = [
           "brand",
@@ -324,7 +369,7 @@ export default {
         );
         axios
           .put(
-            `${this.apiEndpoint}/${this.editedItem.id}`,
+            `${this.apiEndpoint}/update/${this.editedItem.id}`,
             selectedObject,
             this.httpOptions
           )
@@ -337,7 +382,7 @@ export default {
           });
       } else {
         axios
-          .post(`${this.apiEndpoint}`, this.editedItem, this.httpOptions)
+          .post(`${this.apiEndpoint}/create`, this.editedItem, this.httpOptions)
           .then(() => {
             this.showAlert("success");
             this.fetchItems();
