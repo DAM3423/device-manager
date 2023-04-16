@@ -16,6 +16,7 @@ const pagination = Joi.object({
   itemsPerPage: Joi.number().integer().min(1).allow(null),
   sortBy: Joi.array().allow(null),
   sortDesc: Joi.array().allow(null),
+  search: Joi.string().allow(null),
 });
 
 const validateDevice = (req, res, next) => {

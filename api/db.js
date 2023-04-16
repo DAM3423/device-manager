@@ -40,6 +40,8 @@ const getDevices = async (page, itemsPerPage, sortBy, sortDesc) => {
       queryString += ` LIMIT ${itemsPerPage} OFFSET ${offset}`;
     }
 
+    console.log(queryString);
+
     const result = await client.query(queryString);
     return result.rows;
   } finally {
