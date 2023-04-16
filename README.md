@@ -2,6 +2,8 @@
 
 Device Manager is a web application for managing devices. It can be initialized using a shell script that runs the app in a Dockerized environment. The app supports two modes: **development** and **production**.
 
+The tech stack for this application includes PostgreSQL for the database, Node.js with Express for the server-side framework, and Vue.js with Vuetify for the client-side framework. This stack provides a reliable, scalable, and feature-rich platform for building web applications with powerful database functionality and beautiful user interfaces.
+
 ## Starting the application
 
 Before you run the application you will need to add a **.env** file for each environment mode.
