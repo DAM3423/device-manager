@@ -15,27 +15,36 @@ const testDevice = {
 let testId = "";
 
 describe("Devices API", () => {
-  describe("GET /devices", () => {
+  describe("GET /devices/index", () => {
     beforeEach(async () => {
       // Create a new device in the database, this way we know there is at least 1 device here
       await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
     });
 
     it("should return an array of devices", async () => {
-      const response = await request(app).get("/devices");
+      const response = await request(app)
+        .post("/devices/index")
+        .send({
+          page: 1,
+          itemsPerPage: 10,
+          sortBy: ["brand"],
+          sortDesc: ["true"],
+          search: "Teszt",
+        })
+        .set("Accept", "application/json");
 
       expect(response.status).toEqual(200);
       // There should be at least 1 entry ion the return array
-      expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body.items.length).toBeGreaterThan(0);
     });
   });
-  describe("POST /devices", () => {
+  describe("POST /devices/create", () => {
     it("creates a new device successfully", async () => {
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -56,7 +65,7 @@ describe("Devices API", () => {
       delete testDevice.model;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -71,7 +80,7 @@ describe("Devices API", () => {
       testDevice.model = null;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -86,7 +95,7 @@ describe("Devices API", () => {
       delete testDevice.brand;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -101,7 +110,7 @@ describe("Devices API", () => {
       testDevice.brand = null;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -116,7 +125,7 @@ describe("Devices API", () => {
       delete testDevice.release_date;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -139,7 +148,7 @@ describe("Devices API", () => {
       testDevice.release_date = 1;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -154,7 +163,7 @@ describe("Devices API", () => {
       delete testDevice.os;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -177,7 +186,7 @@ describe("Devices API", () => {
       testDevice.os = 1;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -192,7 +201,7 @@ describe("Devices API", () => {
       delete testDevice.is_new;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -215,7 +224,7 @@ describe("Devices API", () => {
       testDevice.is_new = "this should not be a string";
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -230,7 +239,7 @@ describe("Devices API", () => {
       delete testDevice.received_datetime;
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -250,7 +259,7 @@ describe("Devices API", () => {
       testDevice.received_datetime = "this should not be a string";
 
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -262,10 +271,10 @@ describe("Devices API", () => {
       testDevice.received_datetime = receivedDateTimeForAfter;
     });
   });
-  describe("GET /devices/:id", () => {
+  describe("GET /devices/show/:id", () => {
     beforeEach(async () => {
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -273,7 +282,7 @@ describe("Devices API", () => {
     });
 
     it("should return a device by ID", async () => {
-      const res = await request(app).get(`/devices/${testId}`);
+      const res = await request(app).get(`/devices/show/${testId}`);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty("model", testDevice.model);
@@ -289,7 +298,7 @@ describe("Devices API", () => {
 
     it("should return 404 if device is not found", async () => {
       const res = await request(app).get(
-        "/devices/4c9d86d5-004d-44d1-8019-6fd38047bd6f"
+        "/devices/show/4c9d86d5-004d-44d1-8019-6fd38047bd6f"
       );
 
       expect(res.statusCode).toEqual(404);
@@ -297,16 +306,16 @@ describe("Devices API", () => {
     });
 
     it("should return 400 if route parameter for the ID is in the incorrect format", async () => {
-      const res = await request(app).get("/devices/notauuid");
+      const res = await request(app).get("/devices/show/notauuid");
 
       expect(res.statusCode).toEqual(400);
       expect(res.body).toHaveProperty("error", "Invalid UUID format");
     });
   });
-  describe("PUT /devices/:id", () => {
+  describe("PUT /devices/update/:id", () => {
     beforeEach(async () => {
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -318,7 +327,7 @@ describe("Devices API", () => {
 
     it("updates a model successfully", async () => {
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -339,7 +348,7 @@ describe("Devices API", () => {
       delete testDevice.model;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -354,7 +363,7 @@ describe("Devices API", () => {
       testDevice.model = null;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -369,7 +378,7 @@ describe("Devices API", () => {
       delete testDevice.brand;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -384,7 +393,7 @@ describe("Devices API", () => {
       testDevice.brand = null;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -399,7 +408,7 @@ describe("Devices API", () => {
       delete testDevice.release_date;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -422,7 +431,7 @@ describe("Devices API", () => {
       testDevice.release_date = 1;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -437,7 +446,7 @@ describe("Devices API", () => {
       delete testDevice.os;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -460,7 +469,7 @@ describe("Devices API", () => {
       testDevice.os = 1;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -475,7 +484,7 @@ describe("Devices API", () => {
       delete testDevice.is_new;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -498,7 +507,7 @@ describe("Devices API", () => {
       testDevice.is_new = "this should not be a string";
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -513,7 +522,7 @@ describe("Devices API", () => {
       delete testDevice.received_datetime;
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -533,7 +542,7 @@ describe("Devices API", () => {
       testDevice.received_datetime = "this should not be a string";
 
       const res = await request(app)
-        .put(`/devices/${testId}`)
+        .put(`/devices/update/${testId}`)
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -545,10 +554,10 @@ describe("Devices API", () => {
       testDevice.received_datetime = receivedDateTimeForAfter;
     });
   });
-  describe("DELETE /devices/:id", () => {
+  describe("DELETE /devices/delete/:id", () => {
     beforeEach(async () => {
       const res = await request(app)
-        .post("/devices")
+        .post("/devices/create")
         .send(testDevice)
         .set("Accept", "application/json");
 
@@ -556,7 +565,7 @@ describe("Devices API", () => {
     });
 
     it("should delete a device by ID", async () => {
-      const res = await request(app).delete(`/devices/${testId}`);
+      const res = await request(app).delete(`/devices/delete/${testId}`);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty("message", "Device deleted successfully");
@@ -564,7 +573,7 @@ describe("Devices API", () => {
 
     it("should return 404 if device is not found", async () => {
       const res = await request(app).delete(
-        "/devices/4c9d86d5-004d-44d1-8019-6fd38047bd6f"
+        "/devices/delete/4c9d86d5-004d-44d1-8019-6fd38047bd6f"
       );
 
       expect(res.statusCode).toEqual(404);
@@ -572,7 +581,7 @@ describe("Devices API", () => {
     });
 
     it("should return 400 if route parameter for the ID is in the incorrect format", async () => {
-      const res = await request(app).delete("/devices/notauuid");
+      const res = await request(app).delete("/devices/delete/notauuid");
 
       expect(res.statusCode).toEqual(400);
       expect(res.body).toHaveProperty("error", "Invalid UUID format");

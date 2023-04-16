@@ -3,7 +3,9 @@ const Joi = require("joi");
 const device = Joi.object({
   model: Joi.string().required(),
   brand: Joi.string().required(),
-  release_date: Joi.date().allow(null),
+  release_date: Joi.string()
+    .regex(/^\d{4}\/\d{2}$/)
+    .allow(null),
   os: Joi.string().allow(null),
   is_new: Joi.boolean().allow(null),
   received_datetime: Joi.date().allow(null),

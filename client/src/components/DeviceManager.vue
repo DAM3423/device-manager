@@ -395,16 +395,25 @@ export default {
     },
     showAlert(type) {
       if (type === "delete") {
-        this.deleteAlert = !this.deleteAlert;
+        this.deleteAlert = true;
         this.successAlert = false;
+        setTimeout(() => {
+          this.deleteAlert = false;
+        }, 3000);
       } else if (type === "success") {
         this.successMessage = "Entry created";
         this.successAlert = true;
         this.deleteAlert = false;
+        setTimeout(() => {
+          this.successAlert = false;
+        }, 3000);
       } else if (type === "success-edit") {
         this.successMessage = "Entry updated";
         this.successAlert = true;
         this.deleteAlert = false;
+        setTimeout(() => {
+          this.successAlert = false;
+        }, 3000);
       }
     },
   },
