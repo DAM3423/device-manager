@@ -36,81 +36,89 @@
 
                     <v-card-text>
                       <v-container>
-                        <v-row>
-                          <v-col cols="12" md="6">
-                            <v-text-field
-                              v-model="editedItem.brand"
-                              label="Brand"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" md="6">
-                            <v-text-field
-                              v-model="editedItem.model"
-                              label="Model"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" md="6">
-                            <v-text-field
-                              v-model="editedItem.os"
-                              label="Operating System"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" md="6">
-                            <v-menu
-                              v-model="releaseDateMenu"
-                              :close-on-content-click="false"
-                              :nudge-right="40"
-                              transition="scale-transition"
-                              offset-y
-                            >
-                              <template v-slot:activator="{ on }">
-                                <v-text-field
+                        <v-form ref="form" v-model="valid">
+                          <v-row>
+                            <v-col cols="12" md="6">
+                              <v-text-field
+                                v-model="editedItem.brand"
+                                :rules="rules.brand"
+                                label="Brand"
+                              ></v-text-field>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                              <v-text-field
+                                v-model="editedItem.model"
+                                :rules="rules.model"
+                                label="Model"
+                              ></v-text-field>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                              <v-text-field
+                                v-model="editedItem.os"
+                                :rules="rules.os"
+                                label="Operating System"
+                              ></v-text-field>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                              <v-menu
+                                v-model="releaseDateMenu"
+                                :close-on-content-click="false"
+                                :nudge-right="40"
+                                transition="scale-transition"
+                                offset-y
+                              >
+                                <template v-slot:activator="{ on }">
+                                  <v-text-field
+                                    v-model="editedItem.release_date"
+                                    label="Release date"
+                                    :rules="rules.release_date"
+                                    prepend-icon="mdi-calendar"
+                                    readonly
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
+                                <v-date-picker
+                                  format="YYYY-MM"
                                   v-model="editedItem.release_date"
-                                  label="Release date"
-                                  prepend-icon="mdi-calendar"
-                                  readonly
-                                  v-on="on"
-                                ></v-text-field>
-                              </template>
-                              <v-date-picker
-                                format="YYYY-MM"
-                                v-model="editedItem.release_date"
-                                type="month"
-                                @input="releaseDateMenu = false"
-                              ></v-date-picker>
-                            </v-menu>
-                          </v-col>
-                          <v-col cols="12" md="6">
-                            <v-menu
-                              v-model="receivedDatetimeMenu"
-                              :close-on-content-click="false"
-                              :nudge-right="40"
-                              transition="scale-transition"
-                              offset-y
-                            >
-                              <template v-slot:activator="{ on }">
-                                <v-text-field
+                                  type="month"
+                                  @input="releaseDateMenu = false"
+                                ></v-date-picker>
+                              </v-menu>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                              <v-menu
+                                v-model="receivedDatetimeMenu"
+                                :close-on-content-click="false"
+                                :nudge-right="40"
+                                transition="scale-transition"
+                                offset-y
+                              >
+                                <template v-slot:activator="{ on }">
+                                  <v-text-field
+                                    v-model="editedItem.received_datetime"
+                                    label="Received date"
+                                    prepend-icon="mdi-calendar"
+                                    :rules="rules.received_datetime"
+                                    readonly
+                                    v-on="on"
+                                  ></v-text-field>
+                                </template>
+                                <v-date-picker
+                                  format="YYYY-MM-DD"
                                   v-model="editedItem.received_datetime"
-                                  label="Received date"
-                                  prepend-icon="mdi-calendar"
-                                  readonly
-                                  v-on="on"
-                                ></v-text-field>
-                              </template>
-                              <v-date-picker
-                                format="YYYY-MM-DD"
-                                v-model="editedItem.received_datetime"
-                                @input="receivedDatetimeMenu = false"
-                              ></v-date-picker>
-                            </v-menu>
-                          </v-col>
-                          <v-col cols="12" md="6">
-                            <v-switch
-                              v-model="editedItem.is_new"
-                              label="New"
-                            ></v-switch>
-                          </v-col>
-                        </v-row>
+                                  @input="receivedDatetimeMenu = false"
+                                ></v-date-picker>
+                              </v-menu>
+                            </v-col>
+                            <v-col cols="12" md="6">
+                              <v-switch
+                                v-model="editedItem.is_new"
+                                :rules="rules.is_new"
+                                label="New"
+                              ></v-switch>
+                            </v-col>
+                          </v-row>
+                        </v-form>
                       </v-container>
                     </v-card-text>
 
@@ -119,7 +127,12 @@
                       <v-btn color="blue darken-1" text @click="close">
                         Cancel
                       </v-btn>
-                      <v-btn color="blue darken-1" text @click="save">
+                      <v-btn
+                        :disabled="!valid"
+                        color="blue darken-1"
+                        text
+                        @click="save"
+                      >
                         Save
                       </v-btn>
                     </v-card-actions>
@@ -214,6 +227,43 @@ export default {
         Accept: "application/json",
       },
     },
+    valid: true,
+    rules: {
+      model: [
+        (v) => !!v || "Model is required",
+        (v) =>
+          (v && v.length <= 50) ||
+          "Model must be less than or equal to 50 characters",
+      ],
+      brand: [
+        (v) => !!v || "Brand is required",
+        (v) =>
+          (v && v.length <= 50) ||
+          "Brand must be less than or equal to 50 characters",
+      ],
+      release_date: [
+        (v) =>
+          !v ||
+          /^\d{4}-\d{2}$/.test(v) ||
+          "Release date must be in YYYY-MM format",
+      ],
+      os: [
+        (v) =>
+          !v ||
+          v.length <= 50 ||
+          "OS must be less than or equal to 50 characters",
+      ],
+      is_new: [
+        (v) =>
+          v === null || typeof v === "boolean" || "New must be a boolean value",
+      ],
+      received_datetime: [
+        (v) =>
+          !v ||
+          /\d{4}-\d{2}-\d{2}/.test(v) ||
+          "Received datetime must be in YYYY-MM-DD format",
+      ],
+    },
     editedIndex: -1,
     editedItem: {
       brand: "",
@@ -228,7 +278,7 @@ export default {
       model: "",
       os: "",
       release_date: "",
-      is_new: null,
+      is_new: false,
       received_datetime: "",
     },
     successAlert: false,
