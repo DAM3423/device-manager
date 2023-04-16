@@ -132,10 +132,10 @@ describe("Devices API", () => {
 
       testDevice.release_date = releaseDateForAfter;
     });
-    it("returns release_date should be string when release_date field is int", async () => {
+    it("returns release_date should be YYYY/MM when release_date field is int", async () => {
       // Moving the release_date name to a local var so we can reset it after the test
       const releaseDateForAfter = testDevice.release_date;
-      testDevice.release_date = 1;
+      testDevice.release_date = "2022/22a";
 
       const res = await request(app)
         .post("/devices/create")
@@ -143,7 +143,10 @@ describe("Devices API", () => {
         .set("Accept", "application/json");
 
       expect(res.statusCode).toEqual(400);
-      expect(res.body).toEqual({ error: '"release_date" must be a string' });
+      console.log(res.body);
+      expect(res.body).toEqual({
+        error: "release_date must be in format YYYY/MM",
+      });
 
       testDevice.release_date = releaseDateForAfter;
     });

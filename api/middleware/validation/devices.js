@@ -6,7 +6,8 @@ const device = Joi.object({
   brand: Joi.string().required(),
   release_date: Joi.string()
     .regex(/^\d{4}\/\d{2}$/)
-    .allow(null),
+    .allow(null)
+    .message("release_date must be in format YYYY/MM"),
   os: Joi.string().allow(null),
   is_new: Joi.boolean().allow(null),
   received_datetime: Joi.date().allow(null),
