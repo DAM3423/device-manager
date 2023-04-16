@@ -32,3 +32,12 @@ The [API](http://localhost) is avaliable at `http://localhost:8080/`.
 
 The Client is avaliable at `http://localhost:3000/` for [development](http://localhost:3000) mode and `http://localhost` for [production](http://localhost) mode.
 
+The Docker dev environment supports hot reloading, allowing for faster iteration and testing. The production container is optimized for performance and stability, and should only be used for live deployment. 
+
+## Testing
+
+The unit test are created using Jest and Supertest. You can run these tests by using the docker exec command to run a command in the API container.
+
+i.e. `docker exec {CONTAINER_ID} npm run test`
+
+In order to run this command, you will need to find the API container ID either in Docker Desktop or using the command line. `docker ps` will allow you to find the API container ID
