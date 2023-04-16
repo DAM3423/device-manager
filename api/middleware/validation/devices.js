@@ -1,5 +1,6 @@
 const Joi = require("joi");
 
+// Device validation rules
 const device = Joi.object({
   model: Joi.string().required(),
   brand: Joi.string().required(),
@@ -11,8 +12,10 @@ const device = Joi.object({
   received_datetime: Joi.date().allow(null),
 });
 
+// UUID check for route params
 const uuid = Joi.string().uuid();
 
+// Pagination (index) validation rules
 const pagination = Joi.object({
   page: Joi.number().integer().min(1).allow(null),
   itemsPerPage: Joi.number().integer().min(1).allow(null),
@@ -32,10 +35,9 @@ const validateDevice = (req, res, next) => {
 };
 
 const validateUUID = (req, res, next) => {
-  // Validate the UUID in the route param
   const { error } = uuid.validate(req.params.id);
+
   if (error) {
-    // Return a 400 Bad Request error if the UUID is invalid
     return res.status(400).json({ error: "Invalid UUID format" });
   }
 

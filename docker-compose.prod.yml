@@ -2,40 +2,41 @@ version: "3.9"
 services:
   db:
     image: postgres:latest
-    env_file:
-      - ./.env.prod
     restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    env_file:
+      - .env.prod
     volumes:
       - ./db/devices.sql:/docker-entrypoint-initdb.d/devices.sql
     ports:
       - "5432:5432"
     networks:
-      - backend
+      - stack
   api:
     build:
       context: ./api
       dockerfile: Dockerfile.prod
     env_file:
-      - ./.env.prod
+      - .env.prod
     ports:
       - "8080:8080"
     volumes:
       - ./api:/usr/src/api
       - /usr/src/api/node_modules/
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
       - db
     networks:
-      - backend
+      - stack
 
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    ports:
+      - "80:80"
+    volumes:
+      - ./client:/usr/src/client
+      - /usr/src/client/node_modules/
+    networks:
+      - stack
 networks:
-  backend:
+  stack:

@@ -3,10 +3,8 @@ services:
   db:
     image: postgres:latest
     restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    env_file:
+      - .env.dev
     volumes:
       - ./db/devices.sql:/docker-entrypoint-initdb.d/devices.sql
     ports:
@@ -17,17 +15,13 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env.dev
     ports:
       - "8080:8080"
     volumes:
       - ./api:/usr/src/api
       - /usr/src/api/node_modules/
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
       - db
     networks:
