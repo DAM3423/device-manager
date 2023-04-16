@@ -12,7 +12,8 @@ const getDevices = async (page, itemsPerPage, sortBy, sortDesc, search) => {
   const client = await pool.connect();
 
   try {
-    let queryString = "SELECT * FROM devices";
+    let queryString =
+      "SELECT id, model, brand, release_date, os, is_new, received_datetime FROM devices";
     let countQueryString = "SELECT COUNT(*) FROM devices";
 
     const values = [];

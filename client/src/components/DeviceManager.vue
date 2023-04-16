@@ -65,7 +65,7 @@
                             >
                               <template v-slot:activator="{ on }">
                                 <v-text-field
-                                  v-model="editItem.release_date"
+                                  v-model="editedItem.release_date"
                                   label="Release date"
                                   prepend-icon="mdi-calendar"
                                   readonly
@@ -74,7 +74,7 @@
                               </template>
                               <v-date-picker
                                 format="YYYY-MM"
-                                v-model="editItem.release_date"
+                                v-model="editedItem.release_date"
                                 type="month"
                                 @input="releaseDateMenu = false"
                               ></v-date-picker>
@@ -90,7 +90,7 @@
                             >
                               <template v-slot:activator="{ on }">
                                 <v-text-field
-                                  v-model="editItem.received_datetime"
+                                  v-model="editedItem.received_datetime"
                                   label="Received date"
                                   prepend-icon="mdi-calendar"
                                   readonly
@@ -99,14 +99,14 @@
                               </template>
                               <v-date-picker
                                 format="YYYY-MM-DD"
-                                v-model="editItem.received_datetime"
+                                v-model="editedItem.received_datetime"
                                 @input="receivedDatetimeMenu = false"
                               ></v-date-picker>
                             </v-menu>
                           </v-col>
                           <v-col cols="12" md="6">
                             <v-switch
-                              v-model="editItem.is_new"
+                              v-model="editedItem.is_new"
                               label="New"
                             ></v-switch>
                           </v-col>
@@ -172,9 +172,9 @@
                 closable
                 close-label="Close Alert"
                 color="green"
-                title="Entry added"
+                :title="successMessage"
               >
-                Entry added
+                {{ successMessage }}
               </v-alert>
             </template>
             <template v-slot:[`item.actions`]="{ item }">
@@ -232,6 +232,7 @@ export default {
       received_datetime: "",
     },
     successAlert: false,
+    successMessage: "",
     deleteAlert: false,
     search: "",
     releaseDateMenu: false,
@@ -258,7 +259,7 @@ export default {
     search(val) {
       this.string = val;
       this.fetchItems();
-    }
+    },
   },
   methods: {
     async fetchItems() {
@@ -278,7 +279,7 @@ export default {
           },
           this.httpOptions
         );
-        this.items = this.formatDates(response.data.items, "in");
+        this.items = this.formatDatesForTable(response.data.items);
         this.totalItems = parseInt(response.data.total_items);
       } catch (error) {
         console.error(error);
@@ -286,35 +287,30 @@ export default {
         this.loading = false;
       }
     },
-    formatDates(items, direction) {
-      if (direction === "in") {
-        for (let i = 0; i < items.length; i++) {
-          // Change release_date format from YYYY/MM to YYYY-MM
-          items[i].release_date = items[i].release_date.replace("/", "-");
+    formatDatesForTable(items) {
+      for (let i = 0; i < items.length; i++) {
+        // Change release_date format from YYYY/MM to YYYY-MM
+        items[i].release_date = items[i].release_date.replace("/", "-");
 
-          // Change received_datetime format from ISO string to YYYY/MM/DD
-          const dateObj = new Date(items[i].received_datetime);
-          const year = dateObj.getUTCFullYear();
-          const month = ("0" + (dateObj.getUTCMonth() + 1)).slice(-2);
-          const day = ("0" + dateObj.getUTCDate()).slice(-2);
-          items[i].received_datetime = `${year}-${month}-${day}`;
-        }
-      } else {
-        for (let i = 0; i < items.length; i++) {
-          // Change release_date format from YYYY/MM to YYYY-MM
-          items[i].release_date = items[i].release_date.replace("-", "/");
-
-          // Change received_datetime format from YYYY/MM/DD to ISO string
-          const dateArr = items[i].received_datetime.split("/");
-          const year = dateArr[0];
-          const month = ("0" + dateArr[1]).slice(-2);
-          const day = ("0" + dateArr[2]).slice(-2);
-          items[i].received_datetime = `${year}-${month}-${day}T00:00:00.000Z`;
-        }
+        // Change received_datetime format from ISO string to YYYY/MM/DD
+        const dateObj = new Date(items[i].received_datetime);
+        const year = dateObj.getUTCFullYear();
+        const month = ("0" + (dateObj.getUTCMonth() + 1)).slice(-2);
+        const day = ("0" + dateObj.getUTCDate()).slice(-2);
+        items[i].received_datetime = `${year}-${month}-${day}`;
       }
 
-      console.log(items);
       return items;
+    },
+    formatDateForSubmission(item) {
+      const newReleaseDate = item.release_date.replace(/-/g, "/");
+      const newReceivedDate = new Date(item.received_datetime).toISOString();
+
+      return {
+        ...item,
+        release_date: newReleaseDate,
+        received_datetime: newReceivedDate,
+      };
     },
     editItem(item) {
       this.editedIndex = this.items.indexOf(item);
@@ -351,7 +347,6 @@ export default {
       });
     },
     save() {
-      console.log(this.editedItem);
       if (this.editedIndex > -1) {
         const selectedKeys = [
           "brand",
@@ -367,22 +362,27 @@ export default {
             selectedKeys.includes(key)
           )
         );
+
         axios
           .put(
             `${this.apiEndpoint}/update/${this.editedItem.id}`,
-            selectedObject,
+            this.formatDateForSubmission(selectedObject),
             this.httpOptions
           )
-          .then((response) => {
-            console.log("PUT request successful!");
-            console.log(response.data);
+          .then(() => {
+            this.showAlert("success-edit");
+            this.fetchItems();
           })
           .catch((error) => {
             console.error("PUT request failed:", error);
           });
       } else {
         axios
-          .post(`${this.apiEndpoint}/create`, this.editedItem, this.httpOptions)
+          .post(
+            `${this.apiEndpoint}/create`,
+            this.formatDateForSubmission(this.editedItem),
+            this.httpOptions
+          )
           .then(() => {
             this.showAlert("success");
             this.fetchItems();
@@ -398,7 +398,12 @@ export default {
         this.deleteAlert = !this.deleteAlert;
         this.successAlert = false;
       } else if (type === "success") {
-        this.successAlert = !this.successAlert;
+        this.successMessage = "Entry created";
+        this.successAlert = true;
+        this.deleteAlert = false;
+      } else if (type === "success-edit") {
+        this.successMessage = "Entry updated";
+        this.successAlert = true;
         this.deleteAlert = false;
       }
     },
