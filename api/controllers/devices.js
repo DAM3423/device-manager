@@ -7,7 +7,6 @@ const getDevices = async (req, res) => {
   const sortDesc = req.query.sortDesc;
   const search = req.query.search;
 
-  const total = await db.getDeviceCount();
   const devices = await db.getDevices(
     page,
     itemsPerPage,
@@ -17,8 +16,8 @@ const getDevices = async (req, res) => {
   );
 
   res.json({
-    items: devices,
-    total_items: total,
+    items: devices.rows,
+    total_items: devices.count,
   });
 };
 

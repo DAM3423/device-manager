@@ -8,11 +8,27 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const getDevices = async (page, itemsPerPage, sortBy, sortDesc) => {
+const getDevices = async (page, itemsPerPage, sortBy, sortDesc, search) => {
   const client = await pool.connect();
 
   try {
-    let queryString = `SELECT * FROM devices`;
+    let queryString = "SELECT * FROM devices";
+    let countQueryString = "SELECT COUNT(*) FROM devices";
+
+    const values = [];
+    const countValues = [];
+
+    if (search) {
+      const searchValue = `%${search}%`;
+      queryString += ` WHERE (brand, model, os, release_date)::text ILIKE lower($${
+        values.length + 1
+      })`;
+      countQueryString += ` WHERE (brand, model, os, release_date)::text ILIKE lower($${
+        countValues.length + 1
+      })`;
+      values.push(searchValue);
+      countValues.push(searchValue);
+    }
 
     if (
       sortBy &&
@@ -24,11 +40,10 @@ const getDevices = async (page, itemsPerPage, sortBy, sortDesc) => {
       queryString += " ORDER BY";
       for (let i = 0; i < sortBy.length; i++) {
         if (sortBy[i] && sortDesc[i] === "true") {
-          queryString += ` ${sortBy} DESC`;
+          queryString += ` ${sortBy[i]} DESC`;
         } else if (sortBy[i]) {
-          queryString += ` ${sortBy}`;
+          queryString += ` ${sortBy[i]}`;
         }
-
         if (i !== sortBy.length - 1) {
           queryString += ",";
         }
@@ -37,23 +52,23 @@ const getDevices = async (page, itemsPerPage, sortBy, sortDesc) => {
 
     if (page && itemsPerPage) {
       const offset = (page - 1) * itemsPerPage;
-      queryString += ` LIMIT ${itemsPerPage} OFFSET ${offset}`;
+      queryString += ` LIMIT $${values.length + 1} OFFSET $${
+        values.length + 2
+      }`;
+      values.push(itemsPerPage, offset);
     }
 
-    console.log(queryString);
+    const [result, countResult] = await Promise.all([
+      client.query(queryString, values),
+      client.query(countQueryString, countValues),
+    ]);
 
-    const result = await client.query(queryString);
-    return result.rows;
-  } finally {
-    client.release();
-  }
-};
+    const count = parseInt(countResult.rows[0].count);
 
-const getDeviceCount = async () => {
-  const client = await pool.connect();
-  try {
-    const result = await client.query("SELECT COUNT(*) FROM devices;");
-    return result.rows[0].count;
+    return {
+      rows: result.rows,
+      count: count,
+    };
   } finally {
     client.release();
   }
@@ -121,7 +136,6 @@ const deleteDevice = async (id) => {
 
 module.exports = {
   getDevices,
-  getDeviceCount,
   getDeviceById,
   createDevice,
   updateDevice,

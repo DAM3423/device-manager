@@ -86,7 +86,6 @@
         <v-text-field
           class="mx-4"
           v-model="search"
-          @keypress="fetchItems()"
           append-icon="mdi-magnify"
           label="Search"
           single-line
@@ -156,7 +155,7 @@ export default {
     },
     successAlert: false,
     deleteAlert: false,
-    search: null,
+    search: "",
   }),
   computed: {
     formTitle() {
@@ -176,6 +175,10 @@ export default {
     dialogDelete(val) {
       val || this.closeDelete();
     },
+    search(val) {
+      this.string = val;
+      this.fetchItems();
+    }
   },
   methods: {
     async fetchItems() {
