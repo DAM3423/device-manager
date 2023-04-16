@@ -13,7 +13,8 @@ For production mode it is `.env.prod`.
 
 An example .env file is provided below:
 
-`#PGSQL
+```
+#PGSQL
 POSTGRES_USER=sammy
 POSTGRES_PASSWORD=password
 POSTGRES_DB=device_manager
@@ -22,7 +23,8 @@ DB_HOST: db
 DB_PORT: 5432
 DB_NAME: device_manager
 DB_USER: sammy
-DB_PASSWORD: password`
+DB_PASSWORD: password
+```
 
 The environments for the Device Manager web application can be easily deployed using the shell script **start.sh**. This script takes two parameters, **dev** or **prod**, to indicate whether the app should be run in development or production mode, respectively. Additionally, the second parameter **rebuild** can be set to rebuild the Docker container before starting the app.
 
