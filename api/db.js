@@ -39,7 +39,7 @@ const getDevices = async (page, itemsPerPage, sortBy, sortDesc, search) => {
     ) {
       queryString += " ORDER BY";
       for (let i = 0; i < sortBy.length; i++) {
-        if (sortBy[i] && sortDesc[i] === "true") {
+        if (sortBy[i] && sortDesc[i] === true) {
           queryString += ` ${sortBy[i]} DESC`;
         } else if (sortBy[i]) {
           queryString += ` ${sortBy[i]}`;

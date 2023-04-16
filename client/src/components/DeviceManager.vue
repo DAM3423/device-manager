@@ -61,6 +61,42 @@
                               label="Release Date"
                             ></v-text-field>
                           </v-col>
+                          <v-col cols="12" md="6">
+                            <v-text-field
+                              v-model="editedItem.release_date"
+                              label="Release Date"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" md="6">
+                            <v-menu
+                              v-model="menu"
+                              :close-on-content-click="false"
+                              :nudge-right="40"
+                              transition="scale-transition"
+                              offset-y
+                            >
+                              <template v-slot:activator="{ on }">
+                                <v-text-field
+                                  v-model="editItem.date_received"
+                                  label="Date"
+                                  prepend-icon="mdi-calendar"
+                                  readonly
+                                  v-on="on"
+                                ></v-text-field>
+                              </template>
+                              <v-date-picker
+                                format="YYYY/MM/DD"
+                                v-model="editItem.date_received"
+                                @input="menu = false"
+                              ></v-date-picker>
+                            </v-menu>
+                          </v-col>
+                          <v-col cols="12" md="6">
+                            <v-switch
+                              v-model="editItem.is_new"
+                              label="New"
+                            ></v-switch>
+                          </v-col>
                         </v-row>
                       </v-container>
                     </v-card-text>
@@ -148,33 +184,44 @@ export default {
     dialog: false,
     dialogDelete: false,
     headers: [
-      { text: "Brand", value: "brand" },
-      { text: "Model", value: "model" },
-      { text: "OS", value: "os" },
-      { text: "Release Date", value: "release_date" },
-      { text: "Actions", value: "actions", sortable: false },
+      { text: "Brand", value: "brand", width: "20%" },
+      { text: "Model", value: "model", width: "20%" },
+      { text: "OS", value: "os", width: "30%" },
+      { text: "Release Date", value: "release_date", width: "20%" },
+      { text: "Actions", value: "actions", width: "10%", sortable: false },
     ],
     items: [],
     totalItems: 0,
     loading: false,
     options: {},
     apiEndpoint: "http://localhost:8080/devices",
+    httpOptions: {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    },
     editedIndex: -1,
     editedItem: {
       brand: "",
       model: "",
       os: "",
       release_date: "",
+      is_new: null,
+      date_received: "",
     },
     defaultItem: {
       brand: "",
       model: "",
       os: "",
       release_date: "",
+      is_new: null,
+      date_received: "",
     },
     successAlert: false,
     deleteAlert: false,
     search: "",
+    menu: false,
   }),
   computed: {
     formTitle() {
@@ -206,15 +253,17 @@ export default {
       const { sortBy, sortDesc, page, itemsPerPage } = this.options;
 
       try {
-        const response = await axios.get(this.apiEndpoint, {
-          params: {
+        const response = await axios.post(
+          this.apiEndpoint,
+          {
             page: page,
             itemsPerPage: itemsPerPage,
             sortBy: sortBy,
             sortDesc: sortDesc,
             search: this.search,
           },
-        });
+          this.httpOptions
+        );
         this.items = response.data.items;
         this.totalItems = parseInt(response.data.total_items);
       } catch (error) {
@@ -234,8 +283,9 @@ export default {
       this.dialogDelete = true;
     },
     async deleteItemConfirm() {
-      const response = await axios.delete(
-        `${this.apiEndpoint}/${this.editedItem.id}`
+      await axios.delete(
+        `${this.apiEndpoint}/${this.editedItem.id}`,
+        this.httpOptions
       );
 
       this.closeDelete();
@@ -273,7 +323,11 @@ export default {
           )
         );
         axios
-          .put(`${this.apiEndpoint}/${this.editedItem.id}`, selectedObject)
+          .put(
+            `${this.apiEndpoint}/${this.editedItem.id}`,
+            selectedObject,
+            this.httpOptions
+          )
           .then((response) => {
             console.log("PUT request successful!");
             console.log(response.data);
@@ -283,7 +337,7 @@ export default {
           });
       } else {
         axios
-          .post(`${this.apiEndpoint}`, this.editedItem)
+          .post(`${this.apiEndpoint}`, this.editedItem, this.httpOptions)
           .then(() => {
             this.showAlert("success");
             this.fetchItems();

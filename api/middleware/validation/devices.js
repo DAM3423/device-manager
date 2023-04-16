@@ -41,14 +41,12 @@ const validateUUID = (req, res, next) => {
 };
 
 const validatePagination = (req, res, next) => {
-  const { error, value } = pagination.validate(req.query);
+  const { error } = pagination.validate(req.body);
+
   if (error) {
-    return res.status(400).send({ error: error.details[0].message });
+    return res.status(400).json({ error: error.details[0].message });
   }
-  req.pagination = {
-    page: value.page,
-    itemsPerPage: value.itemsPerPage,
-  };
+
   next();
 };
 

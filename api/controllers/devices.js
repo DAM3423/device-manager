@@ -1,18 +1,12 @@
 const db = require("../db");
 
 const getDevices = async (req, res) => {
-  const page = parseInt(req.query.page);
-  const itemsPerPage = parseInt(req.query.itemsPerPage);
-  const sortBy = req.query.sortBy;
-  const sortDesc = req.query.sortDesc;
-  const search = req.query.search;
-
   const devices = await db.getDevices(
-    page,
-    itemsPerPage,
-    sortBy,
-    sortDesc,
-    search
+    parseInt(req.body.page),
+    parseInt(req.body.itemsPerPage),
+    req.body.sortBy,
+    req.body.sortDesc,
+    req.body.search
   );
 
   res.json({
