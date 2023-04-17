@@ -36,7 +36,7 @@ The [API](http://localhost) is avaliable at `http://localhost:8080/`.
 
 The Client is avaliable at `http://localhost:3000/` for [development](http://localhost:3000) mode and `http://localhost` for [production](http://localhost) mode.
 
-The Docker dev environment supports hot reloading, allowing for faster iteration and testing. The production container is optimized for performance and stability, and should only be used for live deployment. 
+The Docker dev environment supports hot reloading, allowing for faster iteration and testing. The production container is optimized for performance and stability, and should only be used for live deployment.
 
 ## Testing
 
@@ -45,3 +45,34 @@ The unit test are created using Jest and Supertest. You can run these tests by u
 i.e. `docker exec {CONTAINER_ID} npm run test`
 
 In order to run this command, you will need to find the API container ID either in Docker Desktop or using the command line. `docker ps` will allow you to find the API container ID
+
+## Project Structure
+
+The project is structured as follows:
+
+```
+.
+├── db
+│   ├── devices.sql
+├── api
+│   ├── Dockerfile.dev
+│   ├── Dockerfile.prod
+│   ├── index.js
+│   └── package.json
+├── client
+│   ├── Dockerfile.dev
+│   ├── Dockerfile.prod
+│   ├── public
+│   ├── src
+│   └── package.json
+├── docker-compose.dev.yml
+└── docker-compose.prod.yml
+```
+
+- db: Contains the PostgreSQL database schema file.
+- api: Contains the Node.js and Express API that provides a RESTful interface to the database.
+- client: Contains the Vue.js client application that consumes the API and presents the user interface.
+- docker-compose.dev.yml: Defines the services that make up the development environment, including the database, API, and client, as well as any additional services required.
+- docker-compose.prod.yml: Defines the services that make up the production environment, including the database, API, and client, as well as any additional services required.
+
+
